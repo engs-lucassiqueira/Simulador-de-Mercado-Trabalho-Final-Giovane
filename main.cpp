@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -98,13 +99,112 @@ void liberarArvore(NoProduto* raiz) {
 // BLOCO 2: CARRINHO DE COMPRAS & PILHA (LIFO)
 // ============================================================================
 
+struct ItemCarrinho {
+    int codigo;
+    string nome;
+    double preco;
+    int quantidade;
+    ItemCarrinho* proximo;
+};
 
+struct PilhaCarrinho {
+    ItemCarrinho* topo = nullptr;
+};
 
+void adicionarCarrinho(PilhaCarrinho& carrinho, NoProduto* catalogo, int codigo, int quantidade) {
 
+    NoProduto* produto = buscarProduto(catalogo, codigo);
 
+    if (produto == nullptr) {
+        cout << "Produto nao encontrado no catalogo!" << endl;
+        return;
+    }
 
+    if (quantidade <= 0) {
+        cout << "Quantidade invalida!" << endl;
+        return;
+    }
 
+    ItemCarrinho* novo = new ItemCarrinho;
 
+    novo->codigo = produto->codigo;
+    novo->nome = produto->nome;
+    novo->preco = produto->preco;
+    novo->quantidade = quantidade;
+
+    novo->proximo = carrinho.topo;
+    carrinho.topo = novo;
+
+    cout << produto->nome << " adicionado ao carrinho!" << endl;
+}
+
+void exibirCarrinho(PilhaCarrinho& carrinho) {
+
+    if (carrinho.topo == nullptr) {
+        cout << "Carrinho vazio!" << endl;
+        return;
+    }
+
+    ItemCarrinho* atual = carrinho.topo;
+    double total = 0;
+
+    cout << "\n--- CARRINHO DE COMPRAS ---" << endl;
+
+    while (atual != nullptr) {
+
+        double subtotal = atual->preco * atual->quantidade;
+
+        cout << "Produto: " << atual->nome << endl;
+        cout << "Codigo: " << atual->codigo << endl;
+        cout << "Quantidade: " << atual->quantidade << endl;
+        cout << "Preco unitario: R$ " << fixed << setprecision(2) << atual->preco << endl;
+        cout << "Subtotal: R$ " << subtotal << endl;
+        cout << "------------------------" << endl;
+
+        total += subtotal;
+        atual = atual->proximo;
+    }
+
+    cout << "TOTAL: R$ " << fixed << setprecision(2) << total << endl;
+}
+
+void removerCarrinho(PilhaCarrinho& carrinho) {
+
+    if (carrinho.topo == nullptr) {
+        cout << "Carrinho vazio! Nao ha produtos para remover." << endl;
+        return;
+    }
+
+    ItemCarrinho* removido = carrinho.topo;
+
+    cout << "Produto removido: " << removido->nome << endl;
+
+    carrinho.topo = removido->proximo;
+
+    delete removido;
+}
+
+double calcularTotal(PilhaCarrinho& carrinho) {
+
+    double total = 0;
+    ItemCarrinho* atual = carrinho.topo;
+
+    while (atual != nullptr) {
+        total += atual->preco * atual->quantidade;
+        atual = atual->proximo;
+    }
+
+    return total;
+}
+
+void liberarCarrinho(PilhaCarrinho& carrinho) {
+
+    while (carrinho.topo != nullptr) {
+        ItemCarrinho* temp = carrinho.topo;
+        carrinho.topo = carrinho.topo->proximo;
+        delete temp;
+    }
+}
 
 
 // ============================================================================
