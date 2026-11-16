@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <iomanip>
 
 using namespace std;
 
@@ -16,6 +15,7 @@ struct NoProduto {
     NoProduto* direita;
 };
 
+// Insere produto na arvore. 
 NoProduto* inserirProduto(NoProduto* raiz, int codigo, string nome, double preco) {
 
     if (raiz == nullptr) {
@@ -43,6 +43,7 @@ NoProduto* inserirProduto(NoProduto* raiz, int codigo, string nome, double preco
     return raiz;
 }
 
+// Exibe produtos em ordem de codigo. 
 void exibirCatalogo(NoProduto* raiz) {
 
     if (raiz != nullptr) {
@@ -58,6 +59,7 @@ void exibirCatalogo(NoProduto* raiz) {
     }
 }
 
+// Busca produto por codigo. 
 NoProduto* buscarProduto(NoProduto* raiz, int codigo) {
 
     if (raiz == nullptr) {
@@ -75,6 +77,7 @@ NoProduto* buscarProduto(NoProduto* raiz, int codigo) {
     return buscarProduto(raiz->direita, codigo);
 }
 
+// Carrega produtos padrao no catalogo. 
 NoProduto* carregarCatalogoInicial(NoProduto* raiz) {
 
     raiz = inserirProduto(raiz, 101, "Arroz", 25.90);
@@ -86,7 +89,8 @@ NoProduto* carregarCatalogoInicial(NoProduto* raiz) {
     return raiz;
 }
 
-void liberarArvore(NoProduto* raiz) {
+// Libera memoria da arvore. 
+void liberarArvore(NoProduto*& raiz) {
 
     if (raiz != nullptr) {
 
@@ -94,11 +98,12 @@ void liberarArvore(NoProduto* raiz) {
         liberarArvore(raiz->direita);
 
         delete raiz;
+        raiz = nullptr;
     }
 }
 
 // ============================================================================
-// BLOCO 2: CARRINHO DE COMPRAS & PILHA (LIFO) - Carlos Beltrão
+// BLOCO 2: CARRINHO DE COMPRAS & PILHA (LIFO) - Carlos Beltrao
 // ============================================================================
 
 struct ItemCarrinho {
@@ -113,7 +118,8 @@ struct PilhaCarrinho {
     ItemCarrinho* topo = nullptr;
 };
 
-void adicionarCarrinho(PilhaCarrinho& carrinho, NoProduto* catalogo, int codigo, int quantidade) {
+// Empilha item no carrinho 
+void adicionarCarrinho(PilhaCarrinho& carrinho, NoProduto* catalogo, int codigo, int quantidade = 1) {
 
     NoProduto* produto = buscarProduto(catalogo, codigo);
 
@@ -140,6 +146,7 @@ void adicionarCarrinho(PilhaCarrinho& carrinho, NoProduto* catalogo, int codigo,
     cout << produto->nome << " adicionado ao carrinho!" << endl;
 }
 
+// Exibe itens do carrinho e total. 
 void exibirCarrinho(PilhaCarrinho& carrinho) {
 
     if (carrinho.topo == nullptr) {
@@ -170,6 +177,7 @@ void exibirCarrinho(PilhaCarrinho& carrinho) {
     cout << "TOTAL: R$ " << total << endl;
 }
 
+// Desempilha ultimo item adicionado.
 void removerCarrinho(PilhaCarrinho& carrinho) {
 
     if (carrinho.topo == nullptr) {
@@ -184,8 +192,10 @@ void removerCarrinho(PilhaCarrinho& carrinho) {
     carrinho.topo = removido->proximo;
 
     delete removido;
+    removido = nullptr;
 }
 
+// Soma valor total do carrinho. 
 double calcularTotal(PilhaCarrinho& carrinho) {
 
     double total = 0;
@@ -199,18 +209,20 @@ double calcularTotal(PilhaCarrinho& carrinho) {
     return total;
 }
 
+// Esvazia pilha e libera memoria. 
 void liberarCarrinho(PilhaCarrinho& carrinho) {
 
     while (carrinho.topo != nullptr) {
         ItemCarrinho* temp = carrinho.topo;
         carrinho.topo = carrinho.topo->proximo;
         delete temp;
+        temp = nullptr;
     }
 }
 
 
 // ============================================================================
-// BLOCO 3: CAIXA, FILA & PAGAMENTO (FIFO) - Kauã Santos
+// BLOCO 3: CAIXA, FILA & PAGAMENTO (FIFO) - Kaua Santos
 // ============================================================================
 struct ClienteFila {
     std::string nome;
@@ -222,6 +234,7 @@ struct FilaCaixa {
     ClienteFila* fim = nullptr;
 };
 
+// Insere cliente no fim da fila. 
 inline void entrarFila(FilaCaixa& fila, const std::string& nome) {
     ClienteFila* novo = new ClienteFila{nome, nullptr};
 
@@ -237,6 +250,7 @@ inline void entrarFila(FilaCaixa& fila, const std::string& nome) {
               << " entrou na fila!\n";
 }
 
+// Mostra clientes aguardando na fila. 
 inline void exibirFila(const FilaCaixa& fila) {
     if (fila.inicio == nullptr) {
         std::cout << "A fila esta vazia!\n";
@@ -257,6 +271,7 @@ inline void exibirFila(const FilaCaixa& fila) {
     }
 }
 
+// Remove primeiro cliente da fila para atendimento.
 inline void chamarProximo(FilaCaixa& fila) {
     if (fila.inicio == nullptr) {
         std::cout << "Nao ha clientes na fila!\n";
@@ -275,13 +290,16 @@ inline void chamarProximo(FilaCaixa& fila) {
     }
 
     delete atendido;
+    atendido = nullptr;
 }
 
+// Libera memoria de toda a fila. 
 inline void liberarFila(FilaCaixa& fila) {
     while (fila.inicio != nullptr) {
         ClienteFila* temp = fila.inicio;
         fila.inicio = fila.inicio->proximo;
         delete temp;
+        temp = nullptr;
     }
 
     fila.fim = nullptr;
@@ -291,18 +309,58 @@ inline void liberarFila(FilaCaixa& fila) {
 // BLOCO 4: ORDENACAO, BUSCAS E MENU PRINCIPAL - Lucas Siqueira
 // ============================================================================
 
-void ordenarPrecos(double precos[], int tamanho) {
-    for (int i = 1; i < tamanho; i++) {
-        double chave = precos[i];
-        int j = i - 1;
-        while (j >= 0 && precos[j] > chave) {
-            precos[j + 1] = precos[j];
-            j--;
-        }
-        precos[j + 1] = chave;
+// Conta total de produtos na arvore. 
+int contarProdutos(NoProduto* raiz) {
+    if (raiz == nullptr) return 0;
+    return 1 + contarProdutos(raiz->esquerda) + contarProdutos(raiz->direita);
+}
+
+// Copia ponteiros da arvore para vetor. 
+void preencherVetor(NoProduto* raiz, NoProduto** vetor, int& indice) {
+    if (raiz != nullptr) {
+        preencherVetor(raiz->esquerda, vetor, indice);
+        vetor[indice++] = raiz;
+        preencherVetor(raiz->direita, vetor, indice);
     }
 }
 
+// Ordena produtos por preco (Insertion Sort - Complexidade: O(n^2) pior caso, O(n) melhor caso)
+void ordenarPrecos(NoProduto** vetor, int tamanho) {
+    for (int i = 1; i < tamanho; i++) {
+        NoProduto* chave = vetor[i];
+        int j = i - 1;
+        while (j >= 0 && vetor[j]->preco > chave->preco) {
+            vetor[j + 1] = vetor[j];
+            j--;
+        }
+        vetor[j + 1] = chave;
+    }
+}
+
+// Exibe catalogo ordenado por preco crescente.
+void exibirCatalogoPorPreco(NoProduto* catalogo) {
+    int total = contarProdutos(catalogo);
+    if (total == 0) {
+        cout << "Catalogo vazio!\n";
+        return;
+    }
+
+    NoProduto** vetor = new NoProduto*[total];
+    int idx = 0;
+    preencherVetor(catalogo, vetor, idx);
+    ordenarPrecos(vetor, total);
+
+    cout << "\n--- CATALOGO POR PRECO ---\n";
+    for (int i = 0; i < total; i++) {
+        cout << "R$ " << vetor[i]->preco << " - " << vetor[i]->nome 
+             << " (Cod: " << vetor[i]->codigo << ")\n";
+    }
+
+    delete[] vetor;
+    vetor = nullptr;
+}
+
+// Funcao principal que gerencia o menu e o fluxo do sistema.
 int main() {
     NoProduto* catalogo = nullptr;
     PilhaCarrinho carrinho;
@@ -324,6 +382,7 @@ int main() {
         cout << "7. Entrar na Fila do Caixa\n";
         cout << "8. Exibir Fila do Caixa\n";
         cout << "9. Chamar Proximo Cliente no Caixa\n";
+        cout << "10. Exibir Catalogo Ordenado por Preco\n";
         cout << "0. Sair\n";
         cout << "Escolha uma opcao: ";
         
@@ -402,6 +461,10 @@ int main() {
                 }
                 break;
             }
+
+            case 10:
+                exibirCatalogoPorPreco(catalogo);
+                break;
 
             case 0:
                 cout << "Encerrando o sistema...\n";
