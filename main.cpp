@@ -5,8 +5,9 @@
 using namespace std;
 
 // ============================================================================
-// BLOCO 1: CATALOGO DE PRODUTOS & ARVORE BINARIA DE BUSCA
+// BLOCO 1: CATALOGO DE PRODUTOS & ARVORE BINARIA DE BUSCA - Vitor Rafael
 // ============================================================================
+
 struct NoProduto {
     int codigo;
     string nome;
@@ -50,7 +51,7 @@ void exibirCatalogo(NoProduto* raiz) {
 
         cout << "Codigo: " << raiz->codigo << endl;
         cout << "Nome: " << raiz->nome << endl;
-        cout << "Preco: R$ " << fixed << setprecision(2) << raiz->preco << endl;
+        cout << "Preco: R$ " << raiz->preco << endl;
         cout << "------------------------" << endl;
 
         exibirCatalogo(raiz->direita);
@@ -95,8 +96,9 @@ void liberarArvore(NoProduto* raiz) {
         delete raiz;
     }
 }
+
 // ============================================================================
-// BLOCO 2: CARRINHO DE COMPRAS & PILHA (LIFO)
+// BLOCO 2: CARRINHO DE COMPRAS & PILHA (LIFO) - Carlos Beltrão
 // ============================================================================
 
 struct ItemCarrinho {
@@ -157,7 +159,7 @@ void exibirCarrinho(PilhaCarrinho& carrinho) {
         cout << "Produto: " << atual->nome << endl;
         cout << "Codigo: " << atual->codigo << endl;
         cout << "Quantidade: " << atual->quantidade << endl;
-        cout << "Preco unitario: R$ " << fixed << setprecision(2) << atual->preco << endl;
+        cout << "Preco unitario: R$ " << atual->preco << endl;
         cout << "Subtotal: R$ " << subtotal << endl;
         cout << "------------------------" << endl;
 
@@ -165,7 +167,7 @@ void exibirCarrinho(PilhaCarrinho& carrinho) {
         atual = atual->proximo;
     }
 
-    cout << "TOTAL: R$ " << fixed << setprecision(2) << total << endl;
+    cout << "TOTAL: R$ " << total << endl;
 }
 
 void removerCarrinho(PilhaCarrinho& carrinho) {
@@ -208,7 +210,7 @@ void liberarCarrinho(PilhaCarrinho& carrinho) {
 
 
 // ============================================================================
-// BLOCO 3: CAIXA, FILA & PAGAMENTO (FIFO)
+// BLOCO 3: CAIXA, FILA & PAGAMENTO (FIFO) - Kauã Santos
 // ============================================================================
 struct ClienteFila {
     std::string nome;
@@ -286,5 +288,132 @@ inline void liberarFila(FilaCaixa& fila) {
 }
 
 // ============================================================================
-// BLOCO 4: ORDENACAO, BUSCAS E MENU PRINCIPAL
+// BLOCO 4: ORDENACAO, BUSCAS E MENU PRINCIPAL - Lucas Siqueira
 // ============================================================================
+
+void ordenarPrecos(double precos[], int tamanho) {
+    for (int i = 1; i < tamanho; i++) {
+        double chave = precos[i];
+        int j = i - 1;
+        while (j >= 0 && precos[j] > chave) {
+            precos[j + 1] = precos[j];
+            j--;
+        }
+        precos[j + 1] = chave;
+    }
+}
+
+int main() {
+    NoProduto* catalogo = nullptr;
+    PilhaCarrinho carrinho;
+    FilaCaixa fila;
+
+    catalogo = carregarCatalogoInicial(catalogo);
+
+    int opcao;
+    do {
+        cout << "\n========================================\n";
+        cout << "       SIMULADOR DE SUPERMERCADO        \n";
+        cout << "========================================\n";
+        cout << "1. Exibir Catalogo de Produtos\n";
+        cout << "2. Cadastrar Novo Produto\n";
+        cout << "3. Buscar Produto por Codigo\n";
+        cout << "4. Adicionar Produto ao Carrinho\n";
+        cout << "5. Exibir Carrinho e Total\n";
+        cout << "6. Remover Ultimo Item do Carrinho\n";
+        cout << "7. Entrar na Fila do Caixa\n";
+        cout << "8. Exibir Fila do Caixa\n";
+        cout << "9. Chamar Proximo Cliente no Caixa\n";
+        cout << "0. Sair\n";
+        cout << "Escolha uma opcao: ";
+        
+        if (!(cin >> opcao)) break;
+        cout << "----------------------------------------\n";
+
+        switch (opcao) {
+            case 1:
+                exibirCatalogo(catalogo);
+                break;
+
+            case 2: {
+                int cod;
+                string nome;
+                double preco;
+                cout << "Codigo: ";
+                cin >> cod;
+                cout << "Nome (sem espacos): ";
+                cin >> nome;
+                cout << "Preco: ";
+                cin >> preco;
+                catalogo = inserirProduto(catalogo, cod, nome, preco);
+                break;
+            }
+
+            case 3: {
+                int codBusca;
+                cout << "Codigo do produto: ";
+                cin >> codBusca;
+                NoProduto* encontrado = buscarProduto(catalogo, codBusca);
+                if (encontrado != nullptr) {
+                    cout << "Produto encontrado: " << encontrado->nome 
+                         << " | Preco: R$ " << encontrado->preco << endl;
+                } else {
+                    cout << "Produto nao encontrado!\n";
+                }
+                break;
+            }
+
+            case 4: {
+                int cod, qtd;
+                cout << "Codigo do produto: ";
+                cin >> cod;
+                cout << "Quantidade: ";
+                cin >> qtd;
+                adicionarCarrinho(carrinho, catalogo, cod, qtd);
+                break;
+            }
+
+            case 5:
+                exibirCarrinho(carrinho);
+                break;
+
+            case 6:
+                removerCarrinho(carrinho);
+                break;
+
+            case 7: {
+                string nomeCliente;
+                cout << "Nome do cliente: ";
+                cin >> nomeCliente;
+                entrarFila(fila, nomeCliente);
+                break;
+            }
+
+            case 8:
+                exibirFila(fila);
+                break;
+
+            case 9: {
+                double total = calcularTotal(carrinho);
+                chamarProximo(fila);
+                if (total > 0) {
+                    cout << "Total da compra finalizada: R$ " << total << endl;
+                    liberarCarrinho(carrinho);
+                }
+                break;
+            }
+
+            case 0:
+                cout << "Encerrando o sistema...\n";
+                liberarArvore(catalogo);
+                liberarCarrinho(carrinho);
+                liberarFila(fila);
+                break;
+
+            default:
+                cout << "Opcao invalida!\n";
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
